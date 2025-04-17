@@ -1,0 +1,90 @@
+b
+
+======================================
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <time.h>
+#include <stdbool.h>
+
+// 字符集定义
+const char lowercase[] = "abcdefghijklmnopqrstuvwxyz";
+const char uppercase[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+const char digits[] = "0123456789";
+const char specials[] = "!@#$%^&*()-_=+[]{}|;:,.<>?/";
+
+// Fisher-Yates洗牌算法
+void shuffle(char *array, size_t n) {
+    for (int i = n - 1; i > 0; i--) {
+        int j = rand() % (i + 1);
+        char temp = array[i];
+        array[i] = array[j];
+        array[j] = temp;
+    }
+}
+
+char* generate_password(int length) {
+    if (length < 4) {
+        printf("错误: 密码长度不能小于4位\n");
+        return NULL;
+    }
+    
+    if (length < 8) {
+        printf("警告: 建议密码长度至少为8位以确保安全性\n");
+    }
+
+    // 初始化随机种子
+    srand(time(NULL));
+    
+    char *password = malloc(length + 1);
+    if (!password) return NULL;
+
+    // 确保包含至少一个每种字符
+    password[0] = lowercase[rand() % (sizeof(lowercase)-1)];
+    password[1] = uppercase[rand() % (sizeof(uppercase)-1)];
+    password[2] = digits[rand() % (sizeof(digits)-1)];
+    password[3] = specials[rand() % (sizeof(specials)-1)];
+
+    // 生成剩余字符
+    const char all_chars[] = "abcdefghijklmnopqrstuvwxyz"
+                             "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+                             "0123456789"
+                             "!@#$%^&*()-_=+[]{}|;:,.<>?/";
+
+    for (int i = 4; i < length; i++) {
+        password[i] = all_chars[rand() % (sizeof(all_chars)-1)];
+    }
+
+    // 洗牌打乱顺序
+    shuffle(password, length);
+    password[length] = '\0';
+
+    return password;
+}
+
+int main() {
+    // 测试不同长度的密码
+    printf("8位密码: %s\n", generate_password(8));
+    printf("12位密码: %s\n", generate_password(12));
+    printf("16位密码: %s\n", generate_password(16));
+
+    // 用户输入测试
+    printf("\n请输入密码长度: ");
+    int length;
+    if (scanf("%d", &length) == 1) {
+        char *pwd = generate_password(length);
+        if (pwd) {
+            printf("生成密码: %s\n", pwd);
+            free(pwd);
+        }
+    } else {
+        printf("输入错误: 请输入有效数字\n");
+    }
+
+    return 0;
+}
+
+/* 编译指令:
+gcc password_generator.c -o password_generator
+*/
